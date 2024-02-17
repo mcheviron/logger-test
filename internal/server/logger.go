@@ -19,7 +19,7 @@ type LoggerConfig struct {
 	AddSource  bool
 }
 
-// New creates a new Logger instance with the provided configuration.
+// NewLogger creates a new Logger instance with the provided configuration.
 // It supports two types of loggers: "json" and "text" (passed as the LoggerType).
 // The function initializes a context (which is used internally only), sets up a handler based on the logger type,
 // and returns a pointer to the Logger struct.
@@ -27,10 +27,14 @@ type LoggerConfig struct {
 // If the configuration specifies to add source information to log messages,
 // the source file name will be extracted and only the base name will be used.
 // The function returns an error if an unsupported logger type is specified.
-func New(config LoggerConfig) (*Logger, error) {
+func NewLogger(config LoggerConfig) (*Logger, error) {
 	ctx := context.Background()
 	var handler slog.Handler
 	replaceAttr := func(groups []string, a slog.Attr) slog.Attr {
+		if a.Key == "function" {
+			return slog.Attr{}
+		}
+
 		if config.AddSource && a.Key == slog.SourceKey {
 			source := a.Value.Any().(*slog.Source)
 			source.File = filepath.Base(source.File)
